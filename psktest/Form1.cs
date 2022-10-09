@@ -50,14 +50,28 @@ public partial class Form1 : Form
             mixedSin[i] = AudioSource[i] * CarrierSin[i];
         }
 
+        int averageSize = 25;
+        double[] smoothedCos = new double[mixedCos.Length - averageSize];
+        double[] smoothedSin = new double[mixedCos.Length - averageSize];
+        for (int i = 0; i < smoothedCos.Length; i++)
+        {
+            smoothedCos[i] = mixedCos.Skip(i).Take(averageSize).Sum() / averageSize;
+            smoothedSin[i] = mixedSin.Skip(i).Take(averageSize).Sum() / averageSize;
+        }
+
         //PlotFft(mixedCos);
         //PlotFft(mixedSin);
 
         var originalLimits = formsPlot1.Plot.GetAxisLimits();
         bool preserveOriginalLimits = formsPlot1.Plot.GetPlottables().Any();
         formsPlot1.Plot.Clear();
-        formsPlot1.Plot.AddSignal(mixedCos);
-        formsPlot1.Plot.AddSignal(mixedSin);
+
+        var c1 = formsPlot1.Plot.Palette.GetColor(0);
+        var c2 = formsPlot1.Plot.Palette.GetColor(1);
+        formsPlot1.Plot.AddSignal(mixedCos, color: Color.FromArgb(50, c1));
+        formsPlot1.Plot.AddSignal(mixedSin, color: Color.FromArgb(50, c2));
+        formsPlot1.Plot.AddSignal(smoothedCos, color: c1);
+        formsPlot1.Plot.AddSignal(smoothedSin, color: c2);
         if (preserveOriginalLimits)
             formsPlot1.Plot.SetAxisLimits(originalLimits);
         formsPlot1.Refresh();
