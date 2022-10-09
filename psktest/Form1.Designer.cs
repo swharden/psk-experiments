@@ -31,6 +31,7 @@ partial class Form1
             this.formsPlot1 = new ScottPlot.FormsPlot();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -42,7 +43,7 @@ partial class Form1
             this.formsPlot1.Location = new System.Drawing.Point(0, 82);
             this.formsPlot1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.formsPlot1.Name = "formsPlot1";
-            this.formsPlot1.Size = new System.Drawing.Size(720, 303);
+            this.formsPlot1.Size = new System.Drawing.Size(720, 322);
             this.formsPlot1.TabIndex = 0;
             // 
             // trackBar1
@@ -65,11 +66,22 @@ partial class Form1
             this.label1.TabIndex = 3;
             this.label1.Text = "Carrier Phase Shift";
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richTextBox1.Location = new System.Drawing.Point(12, 410);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(696, 111);
+            this.richTextBox1.TabIndex = 4;
+            this.richTextBox1.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(720, 385);
+            this.ClientSize = new System.Drawing.Size(720, 533);
+            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.formsPlot1);
@@ -87,4 +99,5 @@ partial class Form1
     private ScottPlot.FormsPlot formsPlot1;
     private TrackBar trackBar1;
     private Label label1;
+    private RichTextBox richTextBox1;
 }

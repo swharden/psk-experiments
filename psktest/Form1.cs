@@ -2,6 +2,7 @@ using FftSharp;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Text;
 
 namespace psktest;
 
@@ -18,6 +19,7 @@ public partial class Form1 : Form
         //AudioSource = AudioSource.Take(20_000).ToArray();
 
         UpdatePlot();
+        formsPlot1.Plot.SetAxisLimits(0, 1.5, -.5, .5);
     }
 
     private void trackBar1_Scroll(object sender, EventArgs e) => UpdatePlot();
@@ -43,23 +45,25 @@ public partial class Form1 : Form
             smoothDiff[i] = diff.Skip(i).Take(lpfPoints).Sum() / lpfPoints;
         }
 
-
         var originalLimits = formsPlot1.Plot.GetAxisLimits();
         bool preserveOriginalLimits = formsPlot1.Plot.GetPlottables().Any();
         formsPlot1.Plot.Clear();
         formsPlot1.Plot.AddSignal(smoothDiff, SampleRate);
 
+        StringBuilder sbRaw = new();
         double firstMeasurement = .1355;
-        int maxCharsToDecode = 1_000;
-        for (int i = 0; i < maxCharsToDecode; i++)
+        int charsDecoded = 0;
+        while (true)
         {
-            double sampleTime = firstMeasurement + i * SymbolTime;
+            double sampleTime = firstMeasurement + charsDecoded * SymbolTime;
             int sampleIndex = (int)(sampleTime * SampleRate);
             if (sampleIndex >= smoothDiff.Length)
                 break;
+            charsDecoded += 1;
 
             bool isHigh = smoothDiff[sampleIndex] > 0;
             Color color = isHigh ? Color.DarkGray : Color.Gray;
+            sbRaw.Append(isHigh ? "1" : "0");
 
             formsPlot1.Plot.AddVerticalLine(sampleTime, color, 2);
             var t = formsPlot1.Plot.AddText(isHigh ? "1" : "0", sampleTime, .35);
@@ -77,6 +81,8 @@ public partial class Form1 : Form
         formsPlot1.Plot.Grid(false);
 
         formsPlot1.Refresh();
+        //richTextBox1.Text = sbRaw.ToString();
+        richTextBox1.Text = Varicode.GetSymbols(sbRaw.ToString());
     }
 
     public void PlotFft(double[] values)
