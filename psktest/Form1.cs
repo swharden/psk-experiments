@@ -1,5 +1,6 @@
 using FftSharp;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 
 namespace psktest;
@@ -14,7 +15,7 @@ public partial class Form1 : Form
         InitializeComponent();
         string path = "../../../../data/sample-bpsk31-8khz.wav";
         (AudioSource, SampleRate) = ReadWAV(path, 1);
-        AudioSource = AudioSource.Take(20_000).ToArray();
+        //AudioSource = AudioSource.Take(20_000).ToArray();
 
         UpdatePlot();
     }
@@ -59,19 +60,41 @@ public partial class Form1 : Form
             smoothedSin[i] = mixedSin.Skip(i).Take(averageSize).Sum() / averageSize;
         }
 
-        //PlotFft(mixedCos);
-        //PlotFft(mixedSin);
+        double[] smoothedSum = new double[smoothedCos.Length];
+        for (int i = 0; i < smoothedSum.Length; i++)
+        {
+            smoothedSum[i] = smoothedCos[i] + smoothedSin[i];
+        }
 
         var originalLimits = formsPlot1.Plot.GetAxisLimits();
         bool preserveOriginalLimits = formsPlot1.Plot.GetPlottables().Any();
         formsPlot1.Plot.Clear();
 
-        var c1 = formsPlot1.Plot.Palette.GetColor(0);
-        var c2 = formsPlot1.Plot.Palette.GetColor(1);
-        formsPlot1.Plot.AddSignal(mixedCos, color: Color.FromArgb(50, c1));
-        formsPlot1.Plot.AddSignal(mixedSin, color: Color.FromArgb(50, c2));
-        formsPlot1.Plot.AddSignal(smoothedCos, color: c1);
-        formsPlot1.Plot.AddSignal(smoothedSin, color: c2);
+        //formsPlot1.Plot.AddSignal(smoothedCos, SampleRate);
+        //formsPlot1.Plot.AddSignal(smoothedSin, SampleRate);
+        formsPlot1.Plot.AddSignal(smoothedSum, SampleRate);
+        
+
+        double firstSymbolOffset = .105 + SymbolTime;
+        for (int symbolNumber = 0; symbolNumber < 1000; symbolNumber++)
+        {
+            double bitStartTime = symbolNumber * SymbolTime + firstSymbolOffset;
+            if (bitStartTime * SampleRate > smoothedCos.Length)
+                break;
+
+            int i = (int)(bitStartTime * SampleRate);
+            bool isHigh = smoothedCos[i] > smoothedSin[i];
+
+            //if (isHigh)
+                //formsPlot1.Plot.AddVerticalLine(bitStartTime, Color.Black, 2);
+
+            /*
+            Color color = isHigh ? Color.Black : Color.Gray;
+            float thickness = isHigh ? 3 : 1;
+            formsPlot1.Plot.AddVerticalLine(bitStartTime, color, thickness);
+            */
+        }
+
         if (preserveOriginalLimits)
             formsPlot1.Plot.SetAxisLimits(originalLimits);
         formsPlot1.Refresh();
