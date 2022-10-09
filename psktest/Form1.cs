@@ -28,75 +28,54 @@ public partial class Form1 : Form
         double SymbolsPerSecond = 31.25;
         double SymbolTime = 1.0 / SymbolsPerSecond;
 
-        double[] CarrierCos = new double[AudioSource.Length];
-        double[] CarrierSin = new double[AudioSource.Length];
-        double CarrierFreq = 1000;
-
-        double CarrierOffsetFraction = (double)trackBar1.Value / 100;
-        double CarrierOffsetTime = CarrierOffsetFraction * SymbolTime * .03;
-        label1.Text = $"Carrier Phase Shift: {CarrierOffsetTime * 1000:N3} ms";
-
-        for (int i = 0; i < CarrierCos.Length; i++)
+        int phaseOffset = trackBar1.Value + 8;
+        int diffPoints = (int)(SymbolTime * SampleRate);
+        double[] diff = new double[AudioSource.Length - diffPoints - phaseOffset];
+        for (int i = 0; i < diff.Length; i++)
         {
-            double time = i / SampleRate + CarrierOffsetTime;
-            CarrierCos[i] = Math.Cos(time * Math.PI * 2 * CarrierFreq);
-            CarrierSin[i] = Math.Sin(time * Math.PI * 2 * CarrierFreq);
+            diff[i] = AudioSource[phaseOffset + i + diffPoints] * AudioSource[i];
         }
 
-        double[] mixedCos = new double[AudioSource.Length];
-        double[] mixedSin = new double[AudioSource.Length];
-        for (int i = 0; i < AudioSource.Length; i++)
+        int lpfPoints = 25;
+        double[] smoothDiff = new double[diff.Length - lpfPoints];
+        for (int i = 0; i < smoothDiff.Length; i++)
         {
-            mixedCos[i] = AudioSource[i] * CarrierCos[i];
-            mixedSin[i] = AudioSource[i] * CarrierSin[i];
+            smoothDiff[i] = diff.Skip(i).Take(lpfPoints).Sum() / lpfPoints;
         }
 
-        int averageSize = 25;
-        double[] smoothedCos = new double[mixedCos.Length - averageSize];
-        double[] smoothedSin = new double[mixedCos.Length - averageSize];
-        for (int i = 0; i < smoothedCos.Length; i++)
-        {
-            smoothedCos[i] = mixedCos.Skip(i).Take(averageSize).Sum() / averageSize;
-            smoothedSin[i] = mixedSin.Skip(i).Take(averageSize).Sum() / averageSize;
-        }
-
-        double[] smoothedSum = new double[smoothedCos.Length];
-        for (int i = 0; i < smoothedSum.Length; i++)
-        {
-            smoothedSum[i] = smoothedCos[i] + smoothedSin[i];
-        }
 
         var originalLimits = formsPlot1.Plot.GetAxisLimits();
         bool preserveOriginalLimits = formsPlot1.Plot.GetPlottables().Any();
         formsPlot1.Plot.Clear();
+        formsPlot1.Plot.AddSignal(smoothDiff, SampleRate);
 
-        //formsPlot1.Plot.AddSignal(smoothedCos, SampleRate);
-        //formsPlot1.Plot.AddSignal(smoothedSin, SampleRate);
-        formsPlot1.Plot.AddSignal(smoothedSum, SampleRate);
-        
-
-        double firstSymbolOffset = .105 + SymbolTime;
-        for (int symbolNumber = 0; symbolNumber < 1000; symbolNumber++)
+        double firstMeasurement = .1355;
+        int maxCharsToDecode = 1_000;
+        for (int i = 0; i < maxCharsToDecode; i++)
         {
-            double bitStartTime = symbolNumber * SymbolTime + firstSymbolOffset;
-            if (bitStartTime * SampleRate > smoothedCos.Length)
+            double sampleTime = firstMeasurement + i * SymbolTime;
+            int sampleIndex = (int)(sampleTime * SampleRate);
+            if (sampleIndex >= smoothDiff.Length)
                 break;
 
-            int i = (int)(bitStartTime * SampleRate);
-            bool isHigh = smoothedCos[i] > smoothedSin[i];
+            bool isHigh = smoothDiff[sampleIndex] > 0;
+            Color color = isHigh ? Color.DarkGray : Color.Gray;
 
-            //if (isHigh)
-                //formsPlot1.Plot.AddVerticalLine(bitStartTime, Color.Black, 2);
-
-            /*
-            Color color = isHigh ? Color.Black : Color.Gray;
-            float thickness = isHigh ? 3 : 1;
-            formsPlot1.Plot.AddVerticalLine(bitStartTime, color, thickness);
-            */
+            formsPlot1.Plot.AddVerticalLine(sampleTime, color, 2);
+            var t = formsPlot1.Plot.AddText(isHigh ? "1" : "0", sampleTime, .35);
+            t.Alignment = ScottPlot.Alignment.MiddleCenter;
+            t.BackgroundFill = true;
+            t.BackgroundColor = color;
+            t.FontBold = true;
+            t.FontSize = 12;
+            t.Color = Color.Black;
         }
 
         if (preserveOriginalLimits)
             formsPlot1.Plot.SetAxisLimits(originalLimits);
+
+        formsPlot1.Plot.Grid(false);
+
         formsPlot1.Refresh();
     }
 
