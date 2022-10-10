@@ -165,8 +165,6 @@ public static class Varicode
         { "DEL", "1110110101" }
     };
 
-    public static Dictionary<string, string> GetCodesBySymbol() => CodesBySymbol;
-
     public static string GetCode(char symbol) => GetCode(symbol.ToString());
 
     public static string GetCode(string symbol)
@@ -220,14 +218,67 @@ public static class Varicode
         return sb.ToString();
     }
 
-    public static string GetSymbolsAndDetails(string codeblock)
+    public static double[] GetBinaryPhaseShifts(string message)
     {
-        StringBuilder sb = new();
-        foreach (string symbolCode in codeblock.Split("00"))
+        List<bool> bits = new();
+        for (int i = 0; i < 25; i++)
         {
-            string symbol = GetSymbol(symbolCode);
-            sb.AppendLine($"{symbol}\t{symbolCode}");
+            bits.Add(false);
         }
-        return sb.ToString();
+
+        foreach (char c in message.ToArray())
+        {
+            bool[] varicodeBits = GetCode(c).ToCharArray().Select(x => x == '1').ToArray();
+            bits.AddRange(varicodeBits);
+            bits.Add(false);
+            bits.Add(false);
+        }
+
+        for (int i = 0; i < 25; i++)
+        {
+            bits.Add(true);
+        }
+
+        List<double> phases = new();
+
+        foreach (bool bit in bits)
+        {
+            double previousPhase = phases.Any() ? phases[phases.Count() - 1] : 0;
+
+            if (bit)
+            {
+                phases.Add(previousPhase);
+                phases.Add(previousPhase);
+            }
+            else
+            {
+                double otherPhase = previousPhase == 0 ? Math.PI : 0;
+                phases.Add(previousPhase);
+                phases.Add(otherPhase);
+            }
+        }
+
+        return phases.ToArray();
+    }
+
+    public static int[] GetEnvelopeShapes(double[] phases)
+    {
+        List<int> amps = new();
+
+        for (int i = 0; i < phases.Length - 1; i += 2)
+        {
+            if (phases[i] != phases[i + 1])
+            {
+                amps.Add(1); // rise
+                amps.Add(2); // fall
+            }
+            else
+            {
+                amps.Add(0); // steady
+                amps.Add(0); // steady
+            }
+        }
+
+        return amps.ToArray();
     }
 }

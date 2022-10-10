@@ -1,15 +1,7 @@
 ﻿using FftSharp;
 using NAudio.Wave;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace psktest;
 public partial class FormEncode : Form
@@ -17,16 +9,13 @@ public partial class FormEncode : Form
     public FormEncode()
     {
         InitializeComponent();
-        //rtbMessage.Text = "0000000000The Quick Brown Fox Jumps Over The Lazy Dog 1234567890 Times!1111111111";
-        //rtbMessage.Text = "test123 test123";
+        rtbMessage.Text = "\nThe Quick Brown Fox Jumped Over The Lazy Dog 1234567890 Times!\n";
     }
 
     private void btnUpdate_Click(object sender, EventArgs e)
     {
-        string testMessage = "0101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100111110011101001101101001010101010011101110010011101110100101010111001111111001010110100101111101001001110101100101011110010101011001010111010011011101001001101101100101010110010111010100100111111101001010101110010111011001101010100110111100100101010110011011010100111011100101011110010011011010010101010100111011100100110101110011111010010101011010010111101100100101101010010101011001111110100100101111010011101101001111111100101110111001010110110010110101100110101101001101010110011011011100101101110010011011010011111110010111011001110111001101111001111100111010010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110011111001110100111110011101001111100111010011111001110100111110011101001101101001010101010011101110010011101110100101010111001111111001010110100101111101001001110101100101011110010101011001010111010011011101001001101101100101010110010111010100100111111101001010101110010111011001101010100110111100100101010110011011010100111011100101011110010011011010010101010100111011100100110101110011111010010101011010010111101100100101101010010101011001111110100100101111010011101101001111111100101110111001010110110010110101100110101101001101010110011011011100101101110010011011010011111110010111011001110111001101111001111100111010010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110011111001110100111110011101001111100111010011111001110100111110011101001101101001010101010011101110010011101110100101010111001111111001010110100101111101001001110101100101011110010101011001010111010011011101001001101101100101010110010111010100100111111101001010101110010111011001101010100110111100100101010110011011010100111011100101011110010011011010010101010100111011100100110101110011111010010101011010010111101100100101101010010101011001111110100100101111010011101101001111111100101110111001010110110010110101100110101101001101010110011011011100101101110010011011010011111110010111011001110111001101111001111100111010010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110010111101100101011110011111001110100111110011101001111100111010011111001110100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101101100101101100111";
-        bool[] messageBits = testMessage.ToArray().Select(x => x == '1').ToArray();
-
-        double[] wave = MakeSound(messageBits);
+        double[] phaseBits = Varicode.GetBinaryPhaseShifts(rtbMessage.Text);
+        double[] wave = GenerateWavBPSK31(phaseBits);
 
         byte[] waveBytes = new byte[wave.Length * 2];
         for (int i = 0; i < wave.Length; i++)
@@ -36,7 +25,7 @@ public partial class FormEncode : Form
             waveBytes[i * 2 + 1] = values[0];
         }
 
-        WaveFormat wavFormat = new(8000, 16, 1);
+        WaveFormat wavFormat = new(44100, 16, 1);
         MemoryStream wavMemoryStream = new(waveBytes);
         RawSourceWaveStream wavStream = new(wavMemoryStream, wavFormat);
         WaveOutEvent output = new();
@@ -44,72 +33,45 @@ public partial class FormEncode : Form
         output.Play();
 
         formsPlot1.Plot.Clear();
-        formsPlot1.Plot.AddSignal(wave, 8000);
+        formsPlot1.Plot.AddSignal(wave, 44100);
         formsPlot1.Refresh();
     }
 
-    private double[] MakeSound(bool[] bits)
+    private double[] GenerateWavBPSK31(double[] phaseShifts)
     {
-        int SampleRate = 8_000;
+        int SampleRate = 44100;
         double carrierFreq = 1000;
-        double chirpsPerSecond = 31.25;
-        int chirpSamples = (int)(SampleRate / chirpsPerSecond); // 256
-        double[] wave = new double[chirpSamples * bits.Length];
+        double baudRate = 31.25;
+        double transitionRate = baudRate * 2;
+        int transitionSamples = (int)(SampleRate / transitionRate);
+        int totalSamples = (int)(phaseShifts.Length * SampleRate / transitionRate);
+        double[] wave = new double[totalSamples];
 
-        var windowFunc = new FftSharp.Windows.Cosine();
+        FftSharp.Windows.Cosine cosWindow = new();
+        double[] envelope = cosWindow.Create(transitionSamples);
 
-        double[] window = windowFunc.Create(chirpSamples);
-        double[] windowStrongStart = windowFunc.Create(chirpSamples);
-        double[] windowStrongEnd = windowFunc.Create(chirpSamples);
-        double[] windowStrongBoth = windowFunc.Create(chirpSamples);
-
-        for (int i = 0; i < window.Length / 2; i++)
+        for (int i = 0; i < wave.Length; i++)
         {
-            windowStrongStart[i] = 1;
-            windowStrongBoth[i] = 1;
-        }
+            // phase modulated carrier
+            double time = (double)i / SampleRate;
+            int frame = (int)(time * transitionRate);
+            double phaseShift = phaseShifts[frame];
+            wave[i] = Math.Cos(2 * Math.PI * carrierFreq * time + phaseShift);
 
-        for (int i = window.Length / 2; i < window.Length; i++)
-        {
-            windowStrongEnd[i] = 1;
-            windowStrongBoth[i] = 1;
-        }
+            // envelope at phase transitions
+            int firstSample = (int)(frame * SampleRate / transitionRate);
+            int distanceFromFrameStart = i - firstSample;
+            int distanceFromFrameEnd = transitionSamples - distanceFromFrameStart + 1;
 
-        for (int i = 0; i < bits.Length; i++)
-        {
-            bool strongStart = (i > 0 && bits[i - 1] == bits[i]);
-            bool strongEnd = (i < bits.Length - 1 && bits[i + 1] == bits[i]);
-
-            double[] thisWindow;
-            if (strongStart && strongEnd)
+            if (distanceFromFrameStart < distanceFromFrameEnd)
             {
-                thisWindow = windowStrongBoth;
-            }
-            else if (strongStart)
-            {
-                thisWindow = windowStrongStart;
-            }
-            else if (strongEnd)
-            {
-                thisWindow = windowStrongEnd;
+                if (frame > 0 && phaseShifts[frame - 1] != phaseShifts[frame])
+                    wave[i] *= envelope[distanceFromFrameStart];
             }
             else
             {
-                thisWindow = window;
-            }
-
-            int startIndex = i * chirpSamples;
-            for (int j = 0; j < chirpSamples; j++)
-            {
-                int thisIndex = startIndex + j;
-                double thisTime = (double)thisIndex / SampleRate;
-
-                wave[startIndex + j] = Math.Cos(thisTime * carrierFreq * 2 * Math.PI) * thisWindow[j];
-
-                if (!bits[i])
-                {
-                    wave[startIndex + j] = -wave[startIndex + j];
-                }
+                if (frame < phaseShifts.Length - 1 && phaseShifts[frame + 1] != phaseShifts[frame])
+                    wave[i] *= envelope[distanceFromFrameEnd];
             }
         }
 
