@@ -1,6 +1,6 @@
 ﻿namespace psktest;
 
-partial class Form1
+partial class FormDecode
 {
     /// <summary>
     ///  Required designer variable.
@@ -32,6 +32,7 @@ partial class Form1
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -72,20 +73,30 @@ partial class Form1
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.Location = new System.Drawing.Point(12, 410);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(696, 111);
+            this.richTextBox1.Size = new System.Drawing.Size(328, 111);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
             // 
-            // Form1
+            // richTextBox2
+            // 
+            this.richTextBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.richTextBox2.Location = new System.Drawing.Point(346, 410);
+            this.richTextBox2.Name = "richTextBox2";
+            this.richTextBox2.Size = new System.Drawing.Size(362, 111);
+            this.richTextBox2.TabIndex = 5;
+            this.richTextBox2.Text = "";
+            // 
+            // FormDecode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(720, 533);
+            this.Controls.Add(this.richTextBox2);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.formsPlot1);
-            this.Name = "Form1";
+            this.Name = "FormDecode";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BPSK-31 Test";
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
@@ -100,4 +111,5 @@ partial class Form1
     private TrackBar trackBar1;
     private Label label1;
     private RichTextBox richTextBox1;
+    private RichTextBox richTextBox2;
 }

@@ -17,6 +17,18 @@ namespace psktest;
  *   http://math0.wvstateu.edu/~baker/cs240/info/varicode.html
  *   http://aintel.bi.ehu.es/psk31theory.html
  *   https://n7yg.net/psk-stuff/psk31-varicode
+ *   http://aintel.bi.ehu.es/psk31.html
+ *   https://sites.google.com/site/psk31matlabproject/introduction-to-psk
+ *   https://sdradventure.wordpress.com/2011/10/15/gnuradio-psk31-decoder-part-1/
+ *   https://github.dev/marcino239/psk31/blob/master/psk31_receiver.ipynb ←NICE
+ *   https://github.com/ghostop14/psk31
+ *   https://pysdr.org/content/digital_modulation.html#phase-shift-keying-psk
+ *   
+ * The preamble is an idle signal of continuous zeroes, 
+ * corresponding to continuous phase reversals at the symbol rate of 31.25 reversals/second. 
+ * 
+ * The postamble is just continuous unmodulated carrier, representing a series of logical ones. 
+ * 
  */
 
 public static class Varicode
@@ -155,8 +167,19 @@ public static class Varicode
 
     public static Dictionary<string, string> GetCodesBySymbol() => CodesBySymbol;
 
+    public static string GetCode(char symbol) => GetCode(symbol.ToString());
+
     public static string GetCode(string symbol)
     {
+        if (symbol == " ")
+            symbol = "SP";
+
+        if (symbol == "\r")
+            symbol = "CR";
+
+        if (symbol == "\n")
+            symbol = "LF";
+
         CodesBySymbol.TryGetValue(symbol, out string? code);
         return code ?? "ERROR";
     }
@@ -194,6 +217,17 @@ public static class Varicode
             sb.Append(symbol);
         }
 
+        return sb.ToString();
+    }
+
+    public static string GetSymbolsAndDetails(string codeblock)
+    {
+        StringBuilder sb = new();
+        foreach (string symbolCode in codeblock.Split("00"))
+        {
+            string symbol = GetSymbol(symbolCode);
+            sb.AppendLine($"{symbol}\t{symbolCode}");
+        }
         return sb.ToString();
     }
 }

@@ -6,12 +6,12 @@ using System.Text;
 
 namespace psktest;
 
-public partial class Form1 : Form
+public partial class FormDecode : Form
 {
     public readonly double[] AudioSource;
     public readonly double SampleRate;
 
-    public Form1()
+    public FormDecode()
     {
         InitializeComponent();
         string path = "../../../../data/sample-bpsk31-8khz.wav";
@@ -81,8 +81,8 @@ public partial class Form1 : Form
         formsPlot1.Plot.Grid(false);
 
         formsPlot1.Refresh();
-        //richTextBox1.Text = sbRaw.ToString();
         richTextBox1.Text = Varicode.GetSymbols(sbRaw.ToString());
+        richTextBox2.Text = sbRaw.ToString();
     }
 
     public void PlotFft(double[] values)
