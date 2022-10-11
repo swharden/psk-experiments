@@ -3,6 +3,7 @@ using NAudio.Wave;
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Security.Policy;
 
 namespace psktest;
 public partial class FormEncode : Form
@@ -48,22 +49,22 @@ public partial class FormEncode : Form
         }
     }
 
-    private double[] CosineWindow(int size)
-    {
-        return Enumerable.Range(0, size).Select(x => Math.Sin(Math.PI / (size) * (x + .5))).ToArray();
-    }
-
     private double[] GenerateWavBPSK31(double[] phaseShifts)
     {
         int SampleRate = SAMPLE_RATE;
-        double carrierFreq = 2000;
+        double carrierFreq = 500;
         double baudRate = 31.25;
         int baudSamples = (int)(SampleRate / baudRate);
         double samplesPerBit = SampleRate / baudRate;
         int totalSamples = (int)(phaseShifts.Length * SampleRate / baudRate);
         double[] wave = new double[totalSamples];
 
-        double[] envelope = CosineWindow((int)samplesPerBit);
+        // create the amplitude envelope sized for a single bit
+        double[] envelope = new double[(int)samplesPerBit];
+        for (int i = 0; i < envelope.Length; i++)
+        {
+            envelope[i] = Math.Sin((i + .5) * Math.PI / envelope.Length);
+        }
 
         for (int i = 0; i < wave.Length; i++)
         {
