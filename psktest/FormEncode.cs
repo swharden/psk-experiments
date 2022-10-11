@@ -2,17 +2,25 @@
 using NAudio.Wave;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace psktest;
 public partial class FormEncode : Form
 {
+    const int SAMPLE_RATE = 8_000;
+
     public FormEncode()
     {
         InitializeComponent();
         rtbMessage.Text = "\nThe Quick Brown Fox Jumped Over The Lazy Dog 1234567890 Times!\n";
+        Generate(false);
     }
 
-    private void btnUpdate_Click(object sender, EventArgs e)
+    private void btnUpdate_Click(object sender, EventArgs e) => Generate(false);
+
+    private void btnPlay_Click(object sender, EventArgs e) => Generate(true);
+
+    private void Generate(bool play)
     {
         double[] phaseBits = Varicode.GetBinaryPhaseShifts(rtbMessage.Text);
         double[] wave = GenerateWavBPSK31(phaseBits);
@@ -25,54 +33,61 @@ public partial class FormEncode : Form
             waveBytes[i * 2 + 1] = values[0];
         }
 
-        WaveFormat wavFormat = new(44100, 16, 1);
-        MemoryStream wavMemoryStream = new(waveBytes);
-        RawSourceWaveStream wavStream = new(wavMemoryStream, wavFormat);
-        WaveOutEvent output = new();
-        output.Init(wavStream);
-        output.Play();
-
         formsPlot1.Plot.Clear();
-        formsPlot1.Plot.AddSignal(wave, 44100);
+        formsPlot1.Plot.AddSignal(wave, SAMPLE_RATE);
         formsPlot1.Refresh();
+
+        if (play)
+        {
+            WaveFormat wavFormat = new(SAMPLE_RATE, 16, 1);
+            MemoryStream wavMemoryStream = new(waveBytes);
+            RawSourceWaveStream wavStream = new(wavMemoryStream, wavFormat);
+            WaveOutEvent output = new();
+            output.Init(wavStream);
+            output.Play();
+        }
+    }
+
+    private double[] CosineWindow(int size)
+    {
+        return Enumerable.Range(0, size).Select(x => Math.Sin(Math.PI / (size) * (x + .5))).ToArray();
     }
 
     private double[] GenerateWavBPSK31(double[] phaseShifts)
     {
-        int SampleRate = 44100;
-        double carrierFreq = 1000;
+        int SampleRate = SAMPLE_RATE;
+        double carrierFreq = 2000;
         double baudRate = 31.25;
-        double transitionRate = baudRate * 2;
-        int transitionSamples = (int)(SampleRate / transitionRate);
-        int totalSamples = (int)(phaseShifts.Length * SampleRate / transitionRate);
+        int baudSamples = (int)(SampleRate / baudRate);
+        double samplesPerBit = SampleRate / baudRate;
+        int totalSamples = (int)(phaseShifts.Length * SampleRate / baudRate);
         double[] wave = new double[totalSamples];
 
-        FftSharp.Windows.Cosine cosWindow = new();
-        double[] envelope = cosWindow.Create(transitionSamples);
+        double[] envelope = CosineWindow((int)samplesPerBit);
 
         for (int i = 0; i < wave.Length; i++)
         {
             // phase modulated carrier
             double time = (double)i / SampleRate;
-            int frame = (int)(time * transitionRate);
+            int frame = (int)(time * baudRate);
             double phaseShift = phaseShifts[frame];
             wave[i] = Math.Cos(2 * Math.PI * carrierFreq * time + phaseShift);
 
             // envelope at phase transitions
-            int firstSample = (int)(frame * SampleRate / transitionRate);
+            int firstSample = (int)(frame * SampleRate / baudRate);
             int distanceFromFrameStart = i - firstSample;
-            int distanceFromFrameEnd = transitionSamples - distanceFromFrameStart + 1;
+            int distanceFromFrameEnd = baudSamples - distanceFromFrameStart + 1;
+            bool isFirstHalfOfFrame = distanceFromFrameStart < distanceFromFrameEnd;
+            bool samePhaseAsLast = frame == 0 ? false : phaseShifts[frame - 1] == phaseShifts[frame];
+            bool samePhaseAsNext = frame == phaseShifts.Length - 1 ? false : phaseShifts[frame + 1] == phaseShifts[frame];
+            bool rampUp = isFirstHalfOfFrame && !samePhaseAsLast;
+            bool rampDown = !isFirstHalfOfFrame && !samePhaseAsNext;
 
-            if (distanceFromFrameStart < distanceFromFrameEnd)
-            {
-                if (frame > 0 && phaseShifts[frame - 1] != phaseShifts[frame])
-                    wave[i] *= envelope[distanceFromFrameStart];
-            }
-            else
-            {
-                if (frame < phaseShifts.Length - 1 && phaseShifts[frame + 1] != phaseShifts[frame])
-                    wave[i] *= envelope[distanceFromFrameEnd];
-            }
+            if (rampUp)
+                wave[i] *= envelope[distanceFromFrameStart];
+
+            if (rampDown)
+                wave[i] *= envelope[distanceFromFrameEnd];
         }
 
         return wave;

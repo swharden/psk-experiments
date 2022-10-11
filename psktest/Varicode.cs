@@ -220,6 +220,7 @@ public static class Varicode
 
     public static double[] GetBinaryPhaseShifts(string message)
     {
+        // convert message into bits
         List<bool> bits = new();
         for (int i = 0; i < 25; i++)
         {
@@ -239,46 +240,17 @@ public static class Varicode
             bits.Add(true);
         }
 
+        // generate phase shifts
         List<double> phases = new();
 
         foreach (bool bit in bits)
         {
             double previousPhase = phases.Any() ? phases[phases.Count() - 1] : 0;
-
-            if (bit)
-            {
-                phases.Add(previousPhase);
-                phases.Add(previousPhase);
-            }
-            else
-            {
-                double otherPhase = previousPhase == 0 ? Math.PI : 0;
-                phases.Add(previousPhase);
-                phases.Add(otherPhase);
-            }
+            double oppositePhase = previousPhase == 0 ? Math.PI : 0;
+            double nextPhase = bit == true ? previousPhase : oppositePhase;
+            phases.Add(nextPhase);
         }
 
         return phases.ToArray();
-    }
-
-    public static int[] GetEnvelopeShapes(double[] phases)
-    {
-        List<int> amps = new();
-
-        for (int i = 0; i < phases.Length - 1; i += 2)
-        {
-            if (phases[i] != phases[i + 1])
-            {
-                amps.Add(1); // rise
-                amps.Add(2); // fall
-            }
-            else
-            {
-                amps.Add(0); // steady
-                amps.Add(0); // steady
-            }
-        }
-
-        return amps.ToArray();
     }
 }

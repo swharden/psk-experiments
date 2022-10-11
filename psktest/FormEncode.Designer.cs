@@ -34,6 +34,7 @@ partial class FormEncode
             this.label2 = new System.Windows.Forms.Label();
             this.btnUpdate = new System.Windows.Forms.Button();
             this.formsPlot1 = new ScottPlot.FormsPlot();
+            this.btnPlay = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // rtbMessage
@@ -92,11 +93,22 @@ partial class FormEncode
             this.formsPlot1.Size = new System.Drawing.Size(775, 445);
             this.formsPlot1.TabIndex = 5;
             // 
+            // btnPlay
+            // 
+            this.btnPlay.Location = new System.Drawing.Point(595, 74);
+            this.btnPlay.Name = "btnPlay";
+            this.btnPlay.Size = new System.Drawing.Size(75, 39);
+            this.btnPlay.TabIndex = 6;
+            this.btnPlay.Text = "Play";
+            this.btnPlay.UseVisualStyleBackColor = true;
+            this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
+            // 
             // FormEncode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 576);
+            this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.formsPlot1);
             this.Controls.Add(this.btnUpdate);
             this.Controls.Add(this.label2);
@@ -118,4 +130,5 @@ partial class FormEncode
     private Label label2;
     private Button btnUpdate;
     private ScottPlot.FormsPlot formsPlot1;
+    private Button btnPlay;
 }
