@@ -23,8 +23,9 @@ public partial class FormEncode : Form
 
     private void Generate(bool play)
     {
-        double[] phaseBits = Varicode.GetBinaryPhaseShifts(rtbMessage.Text);
-        double[] wave = GenerateWavBPSK31(phaseBits);
+        int[] bits = Varicode.GetVaricodeBits(rtbMessage.Text);
+        double[] phases = Varicode.GetPhaseShifts(bits);
+        double[] wave = GenerateWavBPSK31(phases);
 
         byte[] waveBytes = new byte[wave.Length * 2];
         for (int i = 0; i < wave.Length; i++)
@@ -49,14 +50,15 @@ public partial class FormEncode : Form
         }
     }
 
-    private double[] GenerateWavBPSK31(double[] phaseShifts)
+    private double[] GenerateWavBPSK31(double[] phases)
     {
         int SampleRate = SAMPLE_RATE;
-        double carrierFreq = 500;
-        double baudRate = 31.25;
+        double carrierFreq = (double)nudFrequency.Value;
+        double baudRate = 31.25; // BPSK31
+        //double baudRate = 62.5; // BPSK63
         int baudSamples = (int)(SampleRate / baudRate);
         double samplesPerBit = SampleRate / baudRate;
-        int totalSamples = (int)(phaseShifts.Length * SampleRate / baudRate);
+        int totalSamples = (int)(phases.Length * SampleRate / baudRate);
         double[] wave = new double[totalSamples];
 
         // create the amplitude envelope sized for a single bit
@@ -71,7 +73,7 @@ public partial class FormEncode : Form
             // phase modulated carrier
             double time = (double)i / SampleRate;
             int frame = (int)(time * baudRate);
-            double phaseShift = phaseShifts[frame];
+            double phaseShift = phases[frame];
             wave[i] = Math.Cos(2 * Math.PI * carrierFreq * time + phaseShift);
 
             // envelope at phase transitions
@@ -79,8 +81,8 @@ public partial class FormEncode : Form
             int distanceFromFrameStart = i - firstSample;
             int distanceFromFrameEnd = baudSamples - distanceFromFrameStart + 1;
             bool isFirstHalfOfFrame = distanceFromFrameStart < distanceFromFrameEnd;
-            bool samePhaseAsLast = frame == 0 ? false : phaseShifts[frame - 1] == phaseShifts[frame];
-            bool samePhaseAsNext = frame == phaseShifts.Length - 1 ? false : phaseShifts[frame + 1] == phaseShifts[frame];
+            bool samePhaseAsLast = frame == 0 ? false : phases[frame - 1] == phases[frame];
+            bool samePhaseAsNext = frame == phases.Length - 1 ? false : phases[frame + 1] == phases[frame];
             bool rampUp = isFirstHalfOfFrame && !samePhaseAsLast;
             bool rampDown = !isFirstHalfOfFrame && !samePhaseAsNext;
 

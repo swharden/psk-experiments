@@ -35,6 +35,9 @@ partial class FormEncode
             this.btnUpdate = new System.Windows.Forms.Button();
             this.formsPlot1 = new ScottPlot.FormsPlot();
             this.btnPlay = new System.Windows.Forms.Button();
+            this.nudFrequency = new System.Windows.Forms.NumericUpDown();
+            this.label3 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFrequency)).BeginInit();
             this.SuspendLayout();
             // 
             // rtbMessage
@@ -103,11 +106,49 @@ partial class FormEncode
             this.btnPlay.UseVisualStyleBackColor = true;
             this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
             // 
+            // nudFrequency
+            // 
+            this.nudFrequency.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.nudFrequency.Location = new System.Drawing.Point(514, 28);
+            this.nudFrequency.Maximum = new decimal(new int[] {
+            20000,
+            0,
+            0,
+            0});
+            this.nudFrequency.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.nudFrequency.Name = "nudFrequency";
+            this.nudFrequency.Size = new System.Drawing.Size(75, 23);
+            this.nudFrequency.TabIndex = 7;
+            this.nudFrequency.Value = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(514, 9);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(87, 15);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "Frequency (Hz)";
+            // 
             // FormEncode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 576);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.nudFrequency);
             this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.formsPlot1);
             this.Controls.Add(this.btnUpdate);
@@ -117,6 +158,7 @@ partial class FormEncode
             this.Controls.Add(this.rtbMessage);
             this.Name = "FormEncode";
             this.Text = "PSK31 Encoder";
+            ((System.ComponentModel.ISupportInitialize)(this.nudFrequency)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -131,4 +173,6 @@ partial class FormEncode
     private Button btnUpdate;
     private ScottPlot.FormsPlot formsPlot1;
     private Button btnPlay;
+    private NumericUpDown nudFrequency;
+    private Label label3;
 }

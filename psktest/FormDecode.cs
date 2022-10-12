@@ -2,6 +2,7 @@ using FftSharp;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace psktest;
@@ -50,7 +51,7 @@ public partial class FormDecode : Form
         formsPlot1.Plot.Clear();
         formsPlot1.Plot.AddSignal(smoothDiff, SampleRate);
 
-        StringBuilder sbRaw = new();
+        List<int> bits = new();
         double firstMeasurement = .1355;
         int charsDecoded = 0;
         while (true)
@@ -63,7 +64,7 @@ public partial class FormDecode : Form
 
             bool isHigh = smoothDiff[sampleIndex] > 0;
             Color color = isHigh ? Color.DarkGray : Color.Gray;
-            sbRaw.Append(isHigh ? "1" : "0");
+            bits.Add(isHigh ? 1 : 0);
 
             formsPlot1.Plot.AddVerticalLine(sampleTime, color, 2);
             var t = formsPlot1.Plot.AddText(isHigh ? "1" : "0", sampleTime, .35);
@@ -81,8 +82,8 @@ public partial class FormDecode : Form
         formsPlot1.Plot.Grid(false);
 
         formsPlot1.Refresh();
-        richTextBox1.Text = Varicode.GetSymbols(sbRaw.ToString());
-        richTextBox2.Text = sbRaw.ToString();
+        richTextBox1.Text = Varicode.DecodeSymbolBitsToText(bits);
+        richTextBox2.Text = string.Join("", bits.Select(x=>x.ToString()));
     }
 
     public void PlotFft(double[] values)
