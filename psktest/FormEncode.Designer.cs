@@ -37,6 +37,8 @@ partial class FormEncode
             this.btnPlay = new System.Windows.Forms.Button();
             this.nudFrequency = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
+            this.cbBaudRate = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudFrequency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -98,7 +100,7 @@ partial class FormEncode
             // 
             // btnPlay
             // 
-            this.btnPlay.Location = new System.Drawing.Point(595, 74);
+            this.btnPlay.Location = new System.Drawing.Point(619, 74);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.Size = new System.Drawing.Size(75, 39);
             this.btnPlay.TabIndex = 6;
@@ -142,11 +144,36 @@ partial class FormEncode
             this.label3.TabIndex = 8;
             this.label3.Text = "Frequency (Hz)";
             // 
+            // cbBaudRate
+            // 
+            this.cbBaudRate.FormattingEnabled = true;
+            this.cbBaudRate.Items.AddRange(new object[] {
+            "31.25",
+            "62.5",
+            "125",
+            "250"});
+            this.cbBaudRate.Location = new System.Drawing.Point(619, 28);
+            this.cbBaudRate.Name = "cbBaudRate";
+            this.cbBaudRate.Size = new System.Drawing.Size(75, 23);
+            this.cbBaudRate.TabIndex = 9;
+            this.cbBaudRate.Text = "31.25";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(619, 9);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(60, 15);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "Baud Rate";
+            // 
             // FormEncode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 576);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.cbBaudRate);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.nudFrequency);
             this.Controls.Add(this.btnPlay);
@@ -175,4 +202,6 @@ partial class FormEncode
     private Button btnPlay;
     private NumericUpDown nudFrequency;
     private Label label3;
+    private ComboBox cbBaudRate;
+    private Label label4;
 }

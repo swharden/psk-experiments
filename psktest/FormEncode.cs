@@ -54,8 +54,7 @@ public partial class FormEncode : Form
     {
         int SampleRate = SAMPLE_RATE;
         double carrierFreq = (double)nudFrequency.Value;
-        double baudRate = 31.25; // BPSK31
-        //double baudRate = 62.5; // BPSK63
+        double baudRate = double.Parse(cbBaudRate.Text);
         int baudSamples = (int)(SampleRate / baudRate);
         double samplesPerBit = SampleRate / baudRate;
         int totalSamples = (int)(phases.Length * SampleRate / baudRate);
