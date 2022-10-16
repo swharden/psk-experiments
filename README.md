@@ -5,6 +5,8 @@ Phase-shift keying (PSK) notes and resources
 
 ![](psktest/screenshot2.png)
 
+![](psk-encode-test.png)
+
 ### Decoding PSK-31
 
 ![](psktest/screenshot.gif)
