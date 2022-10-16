@@ -9,24 +9,24 @@ using System.Security.Policy;
 namespace psktest;
 public partial class FormEncode : Form
 {
+    const int SAMPLE_RATE = 8000;
+
     public FormEncode()
     {
         InitializeComponent();
         rtbMessage.Text = "\nThe Quick Brown Fox Jumped Over The Lazy Dog 1234567890 Times!\n";
-        Generate(false);
+        Generate();
     }
 
-    private void btnUpdate_Click(object sender, EventArgs e) => Generate(false);
+    private void btnUpdate_Click(object sender, EventArgs e) => Generate();
 
-    private void btnPlay_Click(object sender, EventArgs e) => Generate(true);
-
-    private void Generate(bool play)
+    private double[] Generate()
     {
         PskWaveform psk = new()
         {
             Frequency = (double)nudFrequency.Value,
             BaudRate = double.Parse(cbBaudRate.Text),
-            SampleRate = 8_000,
+            SampleRate = SAMPLE_RATE,
         };
 
         int[] bits = Varicode.GetVaricodeBits(rtbMessage.Text);
@@ -34,15 +34,34 @@ public partial class FormEncode : Form
 
         double[] phases = Varicode.GetPhaseShifts(bits);
         double[] wave = psk.GetWaveformBPSK(phases);
+        UpdatePlot(wave);
 
-        formsPlot1.Plot.Clear();
-        formsPlot1.Plot.AddSignal(wave, psk.SampleRate);
-        formsPlot1.Refresh();
-
-        if (play)
-        {
-            Audio.Play(wave, psk.SampleRate);
-        }
+        return wave;
     }
 
+    private void btnPlay_Click(object sender, EventArgs e)
+    {
+        double[] wave = Generate();
+        Audio.Play(wave, SAMPLE_RATE);
+    }
+
+    private void UpdatePlot(double[] wave)
+    {
+        formsPlot1.Plot.Clear();
+        formsPlot1.Plot.AddSignal(wave, SAMPLE_RATE);
+        formsPlot1.Refresh();
+    }
+
+    private void btnSave_Click(object sender, EventArgs e)
+    {
+        double[] wave = Generate();
+
+        SaveFileDialog savefile = new SaveFileDialog();
+        savefile.FileName = "psk.wav";
+        savefile.Filter = "WAV Files (*.wav)|*.wav";
+        if (savefile.ShowDialog() == DialogResult.OK)
+        {
+            Audio.CreateWavFile(wave, savefile.FileName, SAMPLE_RATE);
+        }
+    }
 }

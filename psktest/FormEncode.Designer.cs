@@ -39,6 +39,7 @@ partial class FormEncode
             this.label3 = new System.Windows.Forms.Label();
             this.cbBaudRate = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.btnSave = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudFrequency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -167,11 +168,22 @@ partial class FormEncode
             this.label4.TabIndex = 10;
             this.label4.Text = "Baud Rate";
             // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(700, 74);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 39);
+            this.btnSave.TabIndex = 11;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
             // FormEncode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 576);
+            this.Controls.Add(this.btnSave);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.cbBaudRate);
             this.Controls.Add(this.label3);
@@ -204,4 +216,5 @@ partial class FormEncode
     private Label label3;
     private ComboBox cbBaudRate;
     private Label label4;
+    private Button btnSave;
 }
