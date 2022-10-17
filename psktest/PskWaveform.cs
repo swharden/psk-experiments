@@ -23,7 +23,7 @@ public class PskWaveform
 
     }
 
-    public double[] GetWaveformBPSK(double[] phases)
+    public double[] GetWaveformBPSK(double[] phases, bool applyEnvelope)
     {
         int baudSamples = (int)(SampleRate / BaudRate);
         double samplesPerBit = SampleRate / BaudRate;
@@ -45,21 +45,24 @@ public class PskWaveform
             double phaseShift = phases[frame];
             wave[i] = Math.Cos(2 * Math.PI * Frequency * time + phaseShift);
 
-            // envelope at phase transitions
-            int firstSample = (int)(frame * SampleRate / BaudRate);
-            int distanceFromFrameStart = i - firstSample;
-            int distanceFromFrameEnd = baudSamples - distanceFromFrameStart + 1;
-            bool isFirstHalfOfFrame = distanceFromFrameStart < distanceFromFrameEnd;
-            bool samePhaseAsLast = frame == 0 ? false : phases[frame - 1] == phases[frame];
-            bool samePhaseAsNext = frame == phases.Length - 1 ? false : phases[frame + 1] == phases[frame];
-            bool rampUp = isFirstHalfOfFrame && !samePhaseAsLast;
-            bool rampDown = !isFirstHalfOfFrame && !samePhaseAsNext;
+            if (applyEnvelope)
+            {
+                // envelope at phase transitions
+                int firstSample = (int)(frame * SampleRate / BaudRate);
+                int distanceFromFrameStart = i - firstSample;
+                int distanceFromFrameEnd = baudSamples - distanceFromFrameStart + 1;
+                bool isFirstHalfOfFrame = distanceFromFrameStart < distanceFromFrameEnd;
+                bool samePhaseAsLast = frame == 0 ? false : phases[frame - 1] == phases[frame];
+                bool samePhaseAsNext = frame == phases.Length - 1 ? false : phases[frame + 1] == phases[frame];
+                bool rampUp = isFirstHalfOfFrame && !samePhaseAsLast;
+                bool rampDown = !isFirstHalfOfFrame && !samePhaseAsNext;
 
-            if (rampUp)
-                wave[i] *= envelope[distanceFromFrameStart];
+                if (rampUp)
+                    wave[i] *= envelope[distanceFromFrameStart];
 
-            if (rampDown)
-                wave[i] *= envelope[distanceFromFrameEnd];
+                if (rampDown)
+                    wave[i] *= envelope[distanceFromFrameEnd];
+            }
         }
 
         return wave;

@@ -15,6 +15,7 @@ public partial class FormEncode : Form
     {
         InitializeComponent();
         rtbMessage.Text = "\nThe Quick Brown Fox Jumped Over The Lazy Dog 1234567890 Times!\n";
+        formsPlot1.Plot.Style(figureBackground: Color.White);
         Generate();
     }
 
@@ -33,7 +34,7 @@ public partial class FormEncode : Form
         rtbSymbols.Text = string.Join("", bits.Select(x => x.ToString()));
 
         double[] phases = Varicode.GetPhaseShifts(bits);
-        double[] wave = psk.GetWaveformBPSK(phases);
+        double[] wave = psk.GetWaveformBPSK(phases, cbEnvelope.Checked);
         UpdatePlot(wave);
 
         return wave;

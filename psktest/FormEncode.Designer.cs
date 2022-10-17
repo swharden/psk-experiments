@@ -40,6 +40,7 @@ partial class FormEncode
             this.cbBaudRate = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.btnSave = new System.Windows.Forms.Button();
+            this.cbEnvelope = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.nudFrequency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -178,11 +179,24 @@ partial class FormEncode
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
+            // cbEnvelope
+            // 
+            this.cbEnvelope.AutoSize = true;
+            this.cbEnvelope.Checked = true;
+            this.cbEnvelope.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbEnvelope.Location = new System.Drawing.Point(700, 32);
+            this.cbEnvelope.Name = "cbEnvelope";
+            this.cbEnvelope.Size = new System.Drawing.Size(74, 19);
+            this.cbEnvelope.TabIndex = 12;
+            this.cbEnvelope.Text = "Envelope";
+            this.cbEnvelope.UseVisualStyleBackColor = true;
+            // 
             // FormEncode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 576);
+            this.Controls.Add(this.cbEnvelope);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.cbBaudRate);
@@ -217,4 +231,5 @@ partial class FormEncode
     private ComboBox cbBaudRate;
     private Label label4;
     private Button btnSave;
+    private CheckBox cbEnvelope;
 }
